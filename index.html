@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <!--Adding Meta Data For Browser-->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+    <title>Payatu CTF </title>
+</head>
+ 
+<body>
+    <div>
+        <h1>Smart Contract Ctf</h1>
+        <p>You work at an organization Evil Corp, a Blockchain based smart contract company. There was a credentials leak incident of one of the developers on the Github, which further allowed an attacker to compromise the Private keys of the developer and use them to deploy a malicious smart contract code in solidity. Forensics team have been called upon from an organization DumbForensics and they are looking for ways to track or find the trail of the attacker so that they can collaborate with relevant agencies to blacklist him/her and track the funds. Your goal is to aid the DumbForensics guys, they are asking for some secret block number and timestamp of the below deployed contract.
+
+	Note: Submit your flag as follows Flag{MD5_of_string} where string is “block_number:timestamp_in_unix” (separated by a colon)</p>
+
+
+	<pre class="prettyprint">class Voila {
+          public:
+         // Voila
+          static const string VOILA = "Voila";
+	 // solidity ctf contract will be deployed here
+  // will not interfere with embedded <a href="#voila2">tags</a>.
+}</pre>
+
+
+ 
+        <!--Create input form to enter mood-->
+        <label for="mood">Input Your FLAG</label> <br />
+        <input type="text" id="mood" />
+ 
+    <!--Adding buttons to set and get mood-->
+    <button onclick="getMood()">Get Mood</button>
+    <button onclick="setMood()">Set Mood</button>
+ 
+    </div>
+ 
+    <!--Adding functionality to interact with smart contract - MoodDairy-->
+ 
+    <!--Importing ether.js library-->
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    </script>
+ 
+    <!--Declaring Contract Address, ABI, ETH Account Connect - Request and asynchnous fn -->
+    <script>
+        
+        // Add provider - ropsten
+        const provider = new ethers.providers.Web3Provider(
+        window.ethereum,
+        "ropsten"
+        );
+ 
+        //Contract Address & ABI
+        const MoodContractAddress = "0xb74C9881649672333d5418eAf337C9A177eB3F97";
+        const MoodContractABI = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "_mood",
+                        "type": "string"
+                    }
+                ],
+                "name": "setMood",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getMood",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+ 
+        //Declare constant
+        let MoodContract;
+        let signer;
+ 
+        //Adding wallet popup support
+        provider.send("eth_requestAccounts", []).then(() => {
+            provider.listAccounts().then(function (accounts) {
+                signer = provider.getSigner(accounts[0]);
+                MoodContract = new ethers.Contract(
+                    MoodContractAddress,
+                    MoodContractABI,
+                    signer
+                );
+            });
+        });
+ 
+        // async fn to get mood
+        async function getMood() {
+            const getMoodPromise = MoodContract.getMood();
+            const Mood = await getMoodPromise;
+            console.log(Mood);
+        }
+        
+        // async fn to set mood
+        async function setMood() {
+            const mood = document.getElementById("mood").value;
+            const setMoodPromise = MoodContract.setMood(mood);
+            await setMoodPromise;
+        }
+    </script>
+</body>
+ 
+</html>
