@@ -13,18 +13,80 @@
  
 <body>
     <div>
-        <h1>Smart Contract Ctf</h1>
+        <h1>Genesis </h1>
         <p>You work at an organization Evil Corp, a Blockchain based smart contract company. There was a credentials leak incident of one of the developers on the Github, which further allowed an attacker to compromise the Private keys of the developer and use them to deploy a malicious smart contract code in solidity. Forensics team have been called upon from an organization DumbForensics and they are looking for ways to track or find the trail of the attacker so that they can collaborate with relevant agencies to blacklist him/her and track the funds. Your goal is to aid the DumbForensics guys, they are asking for some secret block number and timestamp of the below deployed contract.
 
 	Note: Submit your flag as follows Flag{MD5_of_string} where string is “block_number:timestamp_in_unix” (separated by a colon)</p>
 
 
 	<pre class="prettyprint">class Voila {
-          public:
-         // Voila
-          static const string VOILA = "Voila";
-	 // solidity ctf contract will be deployed here
-  // will not interfere with embedded <a href="#voila2">tags</a>.
+
+pragma solidity ^0.6.10;
+
+interface ERC20 {
+    function balanceOf(address account) external returns (uint256);
+
+    function transfer(address recipient, uint256 amount) external returns (bool);
+}
+
+contract Puzzle {
+    uint256 constant BLOCKS_TO_WAIT = 10;
+
+    bytes32 public hash;
+    string mood;
+    bytes32 public flag;
+    address public winner;
+    mapping(address => bytes32) public commits;
+    mapping(address => uint256) public commitBlock;
+
+
+
+    function setMood(string memory _mood) public {
+    	mood = _mood;
+    }
+    function getMood() public view returns(string memory) {
+	return mood;
+}
+
+
+    function flag_ishere() public{
+        // check if you can decode this 
+        // you might need to look deeper 
+        // the code might not be your goal
+        flag = "b1a835683a2431ba28f53e2974f4cbf8";
+    }     
+
+
+
+    function commit(bytes32 _hash) public {
+        commits[msg.sender] = _hash;
+        commitBlock[msg.sender] = block.number;
+    }
+
+    function reveal(string memory _solution) public {
+        bytes32 solutionHash = keccak256(abi.encodePacked(_solution));
+        bytes32 solutionDoubleHash = keccak256(abi.encodePacked(solutionHash));
+        bytes32 commitHash = keccak256(abi.encodePacked(msg.sender, solutionHash));
+        require(winner == address(0), 'Already won');
+        require(block.number > commitBlock[msg.sender] + BLOCKS_TO_WAIT, 'No front-running');
+        require(solutionDoubleHash == hash, 'Invalid solution');
+        require(commitHash == commits[msg.sender], 'Did not commit');
+        winner = msg.sender;
+    }
+
+    function withdraw() public {
+        require(msg.sender == winner, 'Not a winner');
+        msg.sender.transfer(address(this).balance);
+    }
+
+    function withdrawToken(ERC20 token) public {
+        require(msg.sender == winner, 'Not a winner');
+        token.transfer(msg.sender, token.balanceOf(address(this)));
+    }
+
+    receive() external payable {}
+}
+} <a href="#voila2">tags</a>.
 }</pre>
 
 
@@ -34,8 +96,8 @@
         <input type="text" id="mood" />
  
     <!--Adding buttons to set and get mood-->
-    <button onclick="getMood()">Get Mood</button>
-    <button onclick="setMood()">Set Mood</button>
+    <button onclick="getMood()">Get Flag</button>
+    <button onclick="setMood()">Set Flag</button>
  
     </div>
  
@@ -55,7 +117,7 @@
         );
  
         //Contract Address & ABI
-        const MoodContractAddress = "0xb74C9881649672333d5418eAf337C9A177eB3F97";
+        const MoodContractAddress = "0x7d2E372aCD551Cd05DF2f5c29e750C8C27b2B3F2";
         const MoodContractABI = [
             {
                 "inputs": [
